@@ -1,8 +1,6 @@
 # Python Imports
 import asyncio
 import argparse
-import time
-import signal
 import sys
 import select
 import json
@@ -14,13 +12,29 @@ from pydoll_extensions import TabWrapper
 
 # Local Imports
 from utils.script_loader import load_script
+from utils.site_loader import load_site
 
 # TTD
 # Python Logging of Stats
 # MORE CLI Arguments
 
-async def runner(url):
+def build_parser() -> argparse.ArgumentParser:
+    p = argparse.ArgumentParser()
+    sub = p.add_subparsers(dest="cmd", required=True)
+    
+    run = sub.add_parser("run")
+    run.add_argument("target")
+    run.add_argument("--headless", action="store_true", default=False)
+    
+    sub.add_parser("list")
+    
+    return p
+
+async def runner(url: str, *, headless: bool = False) -> None:
     options = ChromiumOptions()
+    
+    if headless:
+        options.add_argument('--headless=new')
     options.add_argument('--disable-blink-features=AutomationControlled')
     options.add_argument('--disable-web-security')
     options.add_argument('--disable-features=VizDisplayCompositor')
@@ -68,6 +82,7 @@ async def load_webpage(browser: Chrome, url: str):
             "awaitPromise": True
         }
     })
+    print("Here", res)
     summary = res["result"]["result"]["value"]
 
     print(json.dumps(summary, indent=2))
@@ -76,12 +91,22 @@ async def load_webpage(browser: Chrome, url: str):
     print("Webpage loaded and scripts executed successfully.")
         
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("url")
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("url")
+    # args = parser.parse_args()
+    
+    args = build_parser().parse_args()
+    sites = load_site()
+    
+    if args.cmd == "list":
+        for site, link in sites.items():
+            print(f"{site:20} {link['url']}")
+        return
+        
+    url = sites.get(args.target, {}).get("url", args.target)
     
     try:
-        asyncio.run(runner(args.url))
+        asyncio.run(runner(url, headless=args.headless))
     except KeyboardInterrupt:
         print("Interrupted by user, shutting down…")
     
