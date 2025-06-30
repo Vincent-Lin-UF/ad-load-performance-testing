@@ -8,9 +8,9 @@ import json
 # PyDoll imports
 from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
-from pydoll_extensions import TabWrapper
 
 # Local Imports
+from pydoll_extensions import TabWrapper
 from utils.script_loader import load_script
 from utils.site_loader import load_site
 
