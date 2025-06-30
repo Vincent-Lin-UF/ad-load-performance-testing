@@ -1,0 +1,10 @@
+[project]
+name = "ad-load"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pydoll-python>=2.2.2",
+    "requests>=2.32.4",
+]
