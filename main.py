@@ -25,7 +25,7 @@ async def runner(url):
         await load_webpage(browser, url)
 
 async def load_webpage(browser: Chrome, url: str):
-    with open("prebid_tracking.js", "r") as f:
+    with open("./injected_scripts/prebid_tracking.js", "r") as f:
         prebid_js = f.read()
     
     with open("performance_metrics.js", "r") as f:
@@ -33,12 +33,6 @@ async def load_webpage(browser: Chrome, url: str):
         
     with open("only_disqus.js", "r") as f:
         disqus_js = f.read()
-        
-    with open("hello.js", "r") as f:
-        hello_js = f.read()
-        
-    with open("make_red.js", "r") as f:
-        red_js = f.read()
     
     real_tab = await browser.start()
     tab = TabWrapper(real_tab)
