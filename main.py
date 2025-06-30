@@ -16,7 +16,7 @@ from utils.site_loader import load_site
 
 # TTD
 # Python Logging of Stats
-# MORE CLI Arguments
+# Fix injections in iframes. It is not doing it correctly.
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser()
@@ -52,6 +52,14 @@ async def load_webpage(browser: Chrome, url: str):
     
     print(f"Loading URL: {url}")
     await tab.go_to_commit(url, prebid_js)
+    
+    # for frame in tab.frames():
+    #     try:
+    #         await frame.inject_script(prebid_js)
+    #     except Exception as e:
+    #         print(f"Error injecting script into frame {frame.id}: {e}")
+    
+    await tab.inject_into_new_frames(prebid_js)
             
     disqus_tag = await tab.find(
         id='disqus_thread',
@@ -74,16 +82,17 @@ async def load_webpage(browser: Chrome, url: str):
         await asyncio.sleep(0.1)
     
     print("Gathering summary from page…")
-    res = await tab._execute_command({
-        "method": "Runtime.evaluate",
-        "params": {
-            "expression": "window.getPrebidPerformanceSummary()",
-            "returnByValue": True,
-            "awaitPromise": True
-        }
-    })
-    print("Here", res)
-    summary = res["result"]["result"]["value"]
+    # res = await tab._execute_command({
+    #     "method": "Runtime.evaluate",
+    #     "params": {
+    #         "expression": "window.getPrebidPerformanceSummary()",
+    #         "returnByValue": True,
+    #         "awaitPromise": True
+    #     }
+    # })
+    # print("Here", res)
+    # summary = res["result"]["result"]["value"]
+    summary = await tab.evaluate("window.getPrebidPerformanceSummary()")
 
     print(json.dumps(summary, indent=2))
     await asyncio.Event().wait()

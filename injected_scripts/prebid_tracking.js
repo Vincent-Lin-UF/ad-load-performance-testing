@@ -6,6 +6,7 @@
 
     console.log("Performance Tracker Initialized");
 
+
     const pageLoadTime = performance.now();
     console.log("Frame loaded at:", pageLoadTime.toFixed(2), "ms, frame:", frameName);
 
@@ -16,6 +17,8 @@
         adRenders: [],
         auctions: [],
     };
+
+    window.getPrebidPerformanceSummary = () => window.prebidPerformanceData;
 
     function waitForPrebid() {
         if (typeof window.pbjs !== 'undefined' &&
@@ -110,7 +113,7 @@
             console.log("Ad Render Failed in frame:", frameName);
             console.log('  Ad Unit:', data.adUnitCode);
             console.log('  Reason:', data.reason);
-    });
+        });
 
         // Summary Function -> Manual Calling
         window.getPrebidPerformanceSummary = function() {

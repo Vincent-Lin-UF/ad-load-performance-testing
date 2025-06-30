@@ -35,11 +35,36 @@ class TabWrapper():
         resp = await self._tab._execute_command(
             RuntimeCommands.evaluate(
                 expression=expression,
-                returnByValue=True
+                return_by_value=True
             )
         )
-
+        print(resp)
         return resp["result"]["result"]["value"]
+    
+    async def inject_script(self, script: str):
+        await self._tab._execute_command(
+            PageCommands.add_script_to_evaluate_on_new_document(
+                source=script,
+                run_immediately=True
+            )
+        )
+        
+    async def inject_into_new_frames(self, script: str):
+        async def _on_attached(event):
+            frame_id = event["params"]["frameId"]
+            try:
+                child = await self._tab.frame(frame_id)  
+                await child._execute_command(  
+                    PageCommands.add_script_to_evaluate_on_new_document(
+                        source=script,
+                        run_immediately=True,
+                        frameId=frame_id
+                    )
+                )
+            except Exception as err:
+                print(f"Skip frame {frame_id[:8]}… ({err})")
+        
+        await self._tab.on(PageEvent.FRAME_ATTACHED, _on_attached)
 
     def __getattr__(self, name):
         return getattr(self._tab, name)
