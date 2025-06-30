@@ -1,3 +1,4 @@
+# Python Imports
 import asyncio
 import argparse
 import time
@@ -6,14 +7,17 @@ import sys
 import select
 import json
 
-# TTD
-# Python Logging of Stats
-# MORE CLI Arguments
-
-
+# PyDoll imports
 from pydoll.browser.chromium import Chrome
 from pydoll.browser.options import ChromiumOptions
 from pydoll_extensions import TabWrapper
+
+# Local Imports
+from utils.script_loader import load_script
+
+# TTD
+# Python Logging of Stats
+# MORE CLI Arguments
 
 async def runner(url):
     options = ChromiumOptions()
@@ -25,14 +29,9 @@ async def runner(url):
         await load_webpage(browser, url)
 
 async def load_webpage(browser: Chrome, url: str):
-    with open("./injected_scripts/prebid_tracking.js", "r") as f:
-        prebid_js = f.read()
-    
-    with open("performance_metrics.js", "r") as f:
-        perf_js = f.read()
-        
-    with open("only_disqus.js", "r") as f:
-        disqus_js = f.read()
+    prebid_js  = load_script("prebid_tracking.js")
+    perf_js    = load_script("performance_metrics.js")
+    disqus_js  = load_script("only_disqus.js")
     
     real_tab = await browser.start()
     tab = TabWrapper(real_tab)
@@ -40,11 +39,6 @@ async def load_webpage(browser: Chrome, url: str):
     print(f"Loading URL: {url}")
     await tab.go_to_commit(url, prebid_js)
             
-    print("Waiting for page to load...")
-    elm = await tab.find(tag_name="body", timeout=2)
-    await tab.execute_script(red_js, elm)
-            
-    
     disqus_tag = await tab.find(
         id='disqus_thread',
         timeout=10,
@@ -76,7 +70,6 @@ async def load_webpage(browser: Chrome, url: str):
     })
     summary = res["result"]["result"]["value"]
 
-    # now you have a Python dict you can inspect or dump
     print(json.dumps(summary, indent=2))
     await asyncio.Event().wait()
 
