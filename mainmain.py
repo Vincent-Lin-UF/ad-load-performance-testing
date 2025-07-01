@@ -51,8 +51,6 @@ async def load_webpage(browser: Chrome, url: str):
     tab = TabWrapper(real_tab)
     
     print(f"Loading URL: {url}")
-    await tab.go_to_commit(url, disqus_js)
-    # Use fetch to intercept and return only disqus
     
     await tab.go_to_commit(url, prebid_js)
     
