@@ -15,7 +15,7 @@ async def test_basic_functionality():
             tab = await browser.start()
             print("Browser started successfully")
             
-            await tab.go_to("https://vincent-lin.com/blog/hello-world")
+            await tab.go_to("https://petapixel.com/2025/06/17/peak-design-pro-lite-tripod-review-the-travel-tripod-we-needed/")
             print("Navigation successful")
             
             title = await tab.execute_script("return document.title")
