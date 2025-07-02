@@ -57,8 +57,10 @@ class TabWrapper():
                         frameId=frame_id
                     )
                 )
+                print(f"[INFO] Script injected into frame: {frame_id}")
             except Exception as err:
-                print(f"Skip frame {frame_id[:8]}… ({err})")
+                # print(f"Skip frame {frame_id[:8]}… ({err})")
+                pass
         
         await self._tab.on(PageEvent.FRAME_ATTACHED, _on_attached)
 
