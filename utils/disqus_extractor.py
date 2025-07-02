@@ -1,9 +1,12 @@
+# Default Libraries
 import re
 from urllib.parse import urlparse
 from typing import Tuple
 
+# Pydoll Imports
 from pydoll.commands.page_commands import PageCommands
 
+# Local Imports
 from loaders.script_loader import load_script
 
 async def extract_disqus_info(tab, url: str) -> Tuple[str, str]:

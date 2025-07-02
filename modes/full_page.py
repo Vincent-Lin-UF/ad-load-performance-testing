@@ -1,11 +1,13 @@
+# Default Libraries
 import asyncio
 import sys
 import select
 import json
 
+# Local Imports
+from pydoll_extensions import TabWrapper
 from loaders.script_loader import load_script
 from utils.injector import inject_scripts
-from pydoll_extensions import TabWrapper
 
 async def full_page(browser, url: str, *, headless: bool = False) -> None:
     tab = TabWrapper(await browser.start())

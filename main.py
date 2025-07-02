@@ -1,10 +1,15 @@
-#!/usr/bin/env python3
-import argparse, asyncio
+#Default Libraries
+import argparse
+import asyncio
+
+# Pydoll Imports
+from pydoll.browser.chromium import Chrome
+
+#Local Imports
 from modes.disqus_only import disqus_only
 from modes.full_page   import full_page
 from loaders.site_loader import load_site
 from utils.make_chrome_options import make_chrome_options
-from pydoll.browser.chromium import Chrome
 
 def build_parser() -> argparse.ArgumentParser:
     p   = argparse.ArgumentParser()

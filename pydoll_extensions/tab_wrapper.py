@@ -1,4 +1,7 @@
+# Default Libraries
 import asyncio
+
+# Pydoll Imports
 from pydoll.browser.tab import Tab
 from pydoll.commands.page_commands import PageCommands
 from pydoll.protocol.page.events import PageEvent

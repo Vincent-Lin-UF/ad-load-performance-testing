@@ -1,14 +1,17 @@
+# Default Libraries
 import base64
 import asyncio
 
+# Pydoll Imports
 from pydoll.commands.fetch_commands import FetchCommands
 from pydoll.constants             import RequestStage
 
+# Local Imports
 from pydoll_extensions            import TabWrapper
+from loaders.template_loader       import render_template
 from loaders.script_loader          import load_script
 from utils.disqus_extractor       import extract_disqus_info
 from utils.injector             import inject_scripts
-from loaders.template_loader       import render_template
 
 async def disqus_only(browser, url: str, headless: bool = False):
     extract_tab = TabWrapper(await browser.start())
