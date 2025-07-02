@@ -3,10 +3,7 @@ import sys
 import select
 import json
 
-from pydoll.browser.chromium import Chrome
-from pydoll.browser.options import ChromiumOptions
-
-from utils.script_loader import load_script
+from loaders.script_loader import load_script
 from utils.injector import inject_scripts
 from pydoll_extensions import TabWrapper
 
