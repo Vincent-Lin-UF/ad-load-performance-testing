@@ -1,9 +1,5 @@
 (function() {
     const frameName = window.name || 'unnamed-frame';
-
-    console.log("HelloHello", typeof window);
-    console.log("ByeBye", window);
-
     console.log("Performance Tracker Initialized");
 
 
