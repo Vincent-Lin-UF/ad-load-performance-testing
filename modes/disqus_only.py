@@ -19,6 +19,10 @@ async def disqus_only(browser, url: str, headless: bool = False):
     await extract_tab.close()
     
     tab = TabWrapper(await browser.new_tab())
+    
+    # Script Injection
+    prebid_js = load_script("prebid_tracking.js")
+    await inject_scripts(tab, prebid_js)
 
     await tab._execute_command(
         FetchCommands.enable(
@@ -55,9 +59,6 @@ async def disqus_only(browser, url: str, headless: bool = False):
 
     await tab.on("Fetch.requestPaused", on_paused)
     
-    # Script Injection
-    prebid_js = load_script("prebid_tracking.js")
-    await inject_scripts(tab, prebid_js)
     
     await tab.go_to_commit(url)
 

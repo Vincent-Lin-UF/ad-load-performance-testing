@@ -24,7 +24,8 @@ async def extract_disqus_info(tab, url: str) -> Tuple[str, str]:
     
     if not resp["result"]["result"]["value"]:
       print("Disqus globals didn't appear within 3s -> falling back early")
-      js_cfg = load_script("extract_disqus_config.js")
+    
+    js_cfg = load_script("extract_disqus_config.js")
     
     resp = await tab._execute_command({
         "method": "Runtime.evaluate",
