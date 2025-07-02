@@ -1,11 +1,7 @@
-import time
 import base64
 import asyncio
 
-from pydoll.browser.chromium      import Chrome
-from pydoll.browser.options       import ChromiumOptions
 from pydoll.commands.fetch_commands import FetchCommands
-from pydoll.commands.page_commands  import PageCommands
 from pydoll.constants             import RequestStage
 
 from pydoll_extensions            import TabWrapper
@@ -42,23 +38,6 @@ async def disqus_only(browser, url: str, headless: bool = False):
                 identifier=identifier,
                 url=url
             )
-#             html = f"""<!DOCTYPE html>
-# <html><head><meta charset="utf-8"><title>Comments</title></head>
-# <body>
-# <div id="disqus_thread"></div>
-# <script>
-# var disqus_config = function () {{
-#     this.page.url        = '{url}';
-#     this.page.identifier = '{identifier}';
-#     this.page.title      = document.title;
-# }};
-# </script>
-# <script src="https://{forum}.disqus.com/embed.js"
-#         data-timestamp="{{timestamp}}"></script>
-# <noscript>Please enable JavaScript to view comments.</noscript>
-# </body></html>
-# """
-#             html = html.replace("{timestamp}", str(int(time.time())))
             b64  = base64.b64encode(html.encode()).decode()
             print(html)
             return await tab._execute_command(
