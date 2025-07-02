@@ -2,28 +2,13 @@ import re
 from urllib.parse import urlparse
 from typing import Tuple
 
-from pydoll.browser.chromium   import Chrome
-from pydoll.browser.options    import ChromiumOptions
 from pydoll.commands.page_commands import PageCommands
 
+from loaders.script_loader import load_script
 
 async def extract_disqus_info(tab, url: str) -> Tuple[str, str]:
     await tab._execute_command(PageCommands.navigate(url))
-
-    js_poll = f"""
-    new Promise(resolve => {{
-      const start = Date.now();
-      (function check() {{
-        if (window.disqus_shortname || window.disqus_identifier) {{
-          return resolve(true);
-        }}
-        if (Date.now() - start > 3000) {{
-          return resolve(false);
-        }}
-        setTimeout(check, 100);
-      }})();
-    }})
-    """
+    js_poll = load_script("disqus_polling.js")
     
     resp = await tab._execute_command({
         "method": "Runtime.evaluate",
@@ -35,26 +20,8 @@ async def extract_disqus_info(tab, url: str) -> Tuple[str, str]:
     })
     
     if not resp["result"]["result"]["value"]:
-        print("Disqus globals didn't appear within 3s -> falling back early")
-
-    js_cfg = """
-    (() => {
-      const cfg = { identifier: null, forum: null };
-      if (window.disqus_shortname)  cfg.forum      = window.disqus_shortname;
-      if (window.disqus_identifier) cfg.identifier = window.disqus_identifier;
-      if (typeof window.disqus_config === 'function') {
-        try { window.disqus_config.call(cfg) } catch {}
-      }
-      if (!cfg.forum) {
-        const s = document.querySelector('script[src*=".disqus.com/embed.js"]');
-        if (s) {
-          const m = s.src.match(/https?:\\/\\/([^.]+)\\.disqus\\.com\\/embed\\.js/);
-          if (m) cfg.forum = m[1];
-        }
-      }
-      return cfg;
-    })()
-    """
+      print("Disqus globals didn't appear within 3s -> falling back early")
+      js_cfg = load_script("extract_disqus_config.js")
     
     resp = await tab._execute_command({
         "method": "Runtime.evaluate",

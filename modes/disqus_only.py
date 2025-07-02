@@ -5,10 +5,10 @@ from pydoll.commands.fetch_commands import FetchCommands
 from pydoll.constants             import RequestStage
 
 from pydoll_extensions            import TabWrapper
-from utils.script_loader          import load_script
+from loaders.script_loader          import load_script
 from utils.disqus_extractor       import extract_disqus_info
 from utils.injector             import inject_scripts
-from utils.template_loader       import render_template
+from loaders.template_loader       import render_template
 
 async def disqus_only(browser, url: str, headless: bool = False):
     extract_tab = TabWrapper(await browser.start())
@@ -39,7 +39,6 @@ async def disqus_only(browser, url: str, headless: bool = False):
                 url=url
             )
             b64  = base64.b64encode(html.encode()).decode()
-            print(html)
             return await tab._execute_command(
                 FetchCommands.fulfill_request(
                     request_id    = rid,

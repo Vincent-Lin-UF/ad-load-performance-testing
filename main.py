@@ -2,7 +2,7 @@
 import argparse, asyncio
 from modes.disqus_only import disqus_only
 from modes.full_page   import full_page
-from utils.site_loader import load_site
+from loaders.site_loader import load_site
 from utils.make_chrome_options import make_chrome_options
 from pydoll.browser.chromium import Chrome
 
