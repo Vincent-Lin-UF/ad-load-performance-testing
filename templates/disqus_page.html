@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Disqus Only</title>
+  </head>
+  <body>
+    <div id="disqus_thread"></div>
+    
+    <script>
+    var disqus_config = function () {{
+        this.page.url        = '{url}';
+        this.page.identifier = '{identifier}';
+        this.page.title      = document.title;
+    }};
+    </script>
+    
+    <script src="https://{forum}.disqus.com/embed.js"
+            data-timestamp="{timestamp}"></script>
+    <noscript>Please enable JavaScript to view comments.</noscript>
+  </body>
+</html>

@@ -12,6 +12,7 @@ from pydoll_extensions            import TabWrapper
 from utils.script_loader          import load_script
 from utils.disqus_extractor       import extract_disqus_info
 from utils.injector             import inject_scripts
+from utils.template_loader       import render_template
 
 async def disqus_only(browser, url: str, headless: bool = False):
     extract_tab = TabWrapper(await browser.start())
@@ -35,24 +36,31 @@ async def disqus_only(browser, url: str, headless: bool = False):
         rurl  = p.get("request", {}).get("url", "")
 
         if rtype == "Document" and rurl == url:
-            html = f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>Comments</title></head>
-<body>
-<div id="disqus_thread"></div>
-<script>
-var disqus_config = function () {{
-    this.page.url        = '{url}';
-    this.page.identifier = '{identifier}';
-    this.page.title      = document.title;
-}};
-</script>
-<script src="https://{forum}.disqus.com/embed.js"
-        data-timestamp="{{timestamp}}"></script>
-<noscript>Please enable JavaScript to view comments.</noscript>
-</body></html>
-"""
-            html = html.replace("{timestamp}", str(int(time.time())))
+            html = render_template(
+                "disqus_page.html",
+                forum=forum,
+                identifier=identifier,
+                url=url
+            )
+#             html = f"""<!DOCTYPE html>
+# <html><head><meta charset="utf-8"><title>Comments</title></head>
+# <body>
+# <div id="disqus_thread"></div>
+# <script>
+# var disqus_config = function () {{
+#     this.page.url        = '{url}';
+#     this.page.identifier = '{identifier}';
+#     this.page.title      = document.title;
+# }};
+# </script>
+# <script src="https://{forum}.disqus.com/embed.js"
+#         data-timestamp="{{timestamp}}"></script>
+# <noscript>Please enable JavaScript to view comments.</noscript>
+# </body></html>
+# """
+#             html = html.replace("{timestamp}", str(int(time.time())))
             b64  = base64.b64encode(html.encode()).decode()
+            print(html)
             return await tab._execute_command(
                 FetchCommands.fulfill_request(
                     request_id    = rid,
