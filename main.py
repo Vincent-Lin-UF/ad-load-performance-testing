@@ -3,6 +3,8 @@ import argparse, asyncio
 from modes.disqus_only import disqus_only
 from modes.full_page   import full_page
 from utils.site_loader import load_site
+from utils.make_chrome_options import make_chrome_options
+from pydoll.browser.chromium import Chrome
 
 def build_parser() -> argparse.ArgumentParser:
     p   = argparse.ArgumentParser()
@@ -17,8 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     return p
 
-def main():
-    args  = build_parser().parse_args()
+async def app(args):
     sites = load_site()
 
     if args.cmd == "list":
@@ -27,18 +28,17 @@ def main():
         return
 
     url = sites.get(args.target, {}).get("url", args.target)
-    headless = args.headless
-
-    if args.bare:
-        runner = disqus_only
-    else:
-        runner = full_page
-
-    try:
-        asyncio.run(runner(url, headless=headless))
-    except KeyboardInterrupt:
-        print("Interrupted by user, shutting down…")
-
+    options = await make_chrome_options(headless=args.headless)
+    
+    async with Chrome(options=options) as browser:
+        if args.bare:
+            await disqus_only(browser, url, headless=args.headless)
+        else:
+            await full_page(browser, url, headless=args.headless)
+            
+def main():
+    args = build_parser().parse_args()
+    asyncio.run(app(args))
 
 if __name__ == "__main__":
     main()

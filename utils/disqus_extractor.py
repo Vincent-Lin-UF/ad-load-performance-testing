@@ -1,4 +1,3 @@
-import asyncio
 import re
 from urllib.parse import urlparse
 from typing import Tuple
@@ -8,7 +7,7 @@ from pydoll.browser.options    import ChromiumOptions
 from pydoll.commands.page_commands import PageCommands
 
 
-async def _extract_disqus_info(tab, url: str) -> Tuple[str, str]:
+async def extract_disqus_info(tab, url: str) -> Tuple[str, str]:
     await tab._execute_command(PageCommands.navigate(url))
 
     js_poll = f"""
@@ -93,18 +92,3 @@ async def _extract_disqus_info(tab, url: str) -> Tuple[str, str]:
         cfg["forum"] = host.split(".")[0]
 
     return cfg["forum"], cfg["identifier"]
-
-
-async def fetch_disqus_config(url: str, headless: bool = True) -> Tuple[str, str]:
-    options = ChromiumOptions()
-    options.add_argument("--headless=new")
-    options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_argument('--disable-web-security')
-    options.add_argument('--disable-features=VizDisplayCompositor')
-    
-    print("Extracting Disqus config from page…")
-
-    async with Chrome(options=options) as browser:
-        tab = await browser.start()
-        return await _extract_disqus_info(tab, url)
-

@@ -8,14 +8,7 @@ class TabWrapper():
     def __init__(self, real_tab: Tab):
         self._tab = real_tab
                 
-    async def go_to_commit(self, url: str, init_script: str):
-        await self._tab._execute_command(
-            PageCommands.add_script_to_evaluate_on_new_document(
-                source=init_script,
-                run_immediately=True
-            )
-        )
-        
+    async def go_to_commit(self, url: str):
         if await self._tab._refresh_if_url_not_changed(url):
             return
 
