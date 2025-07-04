@@ -7,5 +7,19 @@ requires-python = ">=3.11"
 dependencies = [
     "bs4>=0.0.2",
     "pydoll-python>=2.2.2",
+    "pytest>=8.4.1",
     "requests>=2.32.4",
 ]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["ad_load*"]
+
+[tool.setuptools.package-data]
+"ad_load.loaders" = ["sites.yaml"]
+"ad_load.injected_scripts" = ["*.js"]
+"ad_load.templates" = ["*.html"]

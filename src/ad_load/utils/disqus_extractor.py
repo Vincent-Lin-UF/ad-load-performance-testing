@@ -7,10 +7,14 @@ from typing import Tuple
 from pydoll.commands.page_commands import PageCommands
 
 # Local Imports
-from loaders.script_loader import load_script
+from ad_load.loaders.script_loader import load_script
+from ad_load.loaders.script_loader import _BASE_DIR
+
 
 async def extract_disqus_info(tab, url: str) -> Tuple[str, str]:
     await tab._execute_command(PageCommands.navigate(url))
+    print("DEBUG: loader looking in", _BASE_DIR, "for disqus_polling.js")
+
     js_poll = load_script("disqus_polling.js")
     
     resp = await tab._execute_command({

@@ -2,7 +2,7 @@ import time
 from pathlib import Path
 from functools import lru_cache
 
-_TEMPLATES_DIR = Path(__file__).resolve().parent.parent / "templates"
+_TEMPLATES_DIR = Path(__file__).resolve().parents[3]/ "templates"
 
 @lru_cache
 def _load_raw_template(name: str) -> str:

@@ -5,9 +5,9 @@ import select
 import json
 
 # Local Imports
-from pydoll_extensions import TabWrapper
-from loaders.script_loader import load_script
-from utils.cdp_injector import inject_scripts
+from ad_load.pydoll_extensions import TabWrapper
+from ad_load.loaders.script_loader import load_script
+from ad_load.utils.cdp_injector import inject_scripts
 
 async def full_page(browser, url: str, *, headless: bool = False) -> None:
     tab = TabWrapper(await browser.start())

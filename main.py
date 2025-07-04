@@ -6,10 +6,10 @@ import asyncio
 from pydoll.browser.chromium import Chrome
 
 #Local Imports
-from modes.disqus_only import disqus_only
-from modes.full_page   import full_page
-from loaders.site_loader import load_site
-from utils.make_chrome_options import make_chrome_options
+from ad_load.modes.disqus_only import disqus_only
+from ad_load.modes.full_page   import full_page
+from ad_load.loaders.site_loader import load_site
+from ad_load.utils.make_chrome_options import make_chrome_options
 
 def build_parser() -> argparse.ArgumentParser:
     p   = argparse.ArgumentParser()

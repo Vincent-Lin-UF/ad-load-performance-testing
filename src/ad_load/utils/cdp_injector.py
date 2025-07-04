@@ -1,4 +1,4 @@
-from pydoll_extensions import TabWrapper
+from ad_load.pydoll_extensions import TabWrapper
 
 async def inject_scripts(tab: TabWrapper, *scripts: str) -> None:
     for script in scripts:
