@@ -10,7 +10,6 @@ from pydoll.protocol.page.events import PageEvent
 from pydoll.commands.runtime_commands import RuntimeCommands
 from pydoll.commands.dom_commands  import DomCommands
 
-
 class TabWrapper():
     def __init__(self, real_tab: Tab):
         self._tab = real_tab
@@ -50,24 +49,26 @@ class TabWrapper():
         )
         
     async def inject_into_new_frames(self, user_script: str):        
-        wrapper = (
-            "const code = " + json.dumps(user_script) + ";\n"
-            "(function(){\n"
-            "try {\n"
-            "    const fe = window.frameElement;\n"
-            "    const me = fe ? `iframe#${fe.id}` : 'top-level';\n"
-            "    console.log(`[DSQ-DBG] running in ${me} @ ${location.href}`);\n"
-            "    console.log('[DSQ-DBG] wrapper executing in frame:', window.frameElement && window.frameElement.id, location.hostname);"
-            "    // List all iframes *inside* this document\n"
-            "    const sources = Array.from(document.getElementsByTagName('iframe'))\n"
-            "    .map(f => f.src || '<no-src>');\n"
-            "    console.log(`[DSQ-DBG] child iframes:`, sources);\n"
-            "    eval(code)\n"
-            "} catch(e) {\n"
-            "    console.error(\"[DSQ-DBG] wrapper error\", e);\n"
-            "}\n"
-            "})();\n"
-        )
+        user_code_literal = json.dumps(user_script)
+
+        wrapper = f"""
+            ;(function(){{
+                try {{
+                    const fe = window.frameElement;
+                    const me = fe ? `iframe#${{fe.id}}` : 'top-level';
+                    console.log(`[DSQ-DBG] running in ${{me}} @ ${{location.href}}`);
+                    console.log('[DSQ-DBG] wrapper executing in frame:', fe && fe.id, location.hostname);
+
+                    const sources = Array.from(document.getElementsByTagName('iframe'))
+                                        .map(f => f.src || '<no-src>');
+                    console.log(`[DSQ-DBG] child iframes:`, sources);
+
+                    (new Function(userCode))();
+                }} catch(e) {{
+                    console.error("[DSQ-DBG] wrapper error", e);
+                }}
+            }})();
+        """
 
         await self._tab._execute_command(DomCommands.enable())
 

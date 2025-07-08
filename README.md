@@ -1,193 +1,144 @@
-# End-to-End Performance Testing Environment for Website and Ad Load Time
+# End‑to‑End Ad‑Load Performance Tester
 
-A comprehensive testing environment that simulates real-world browser conditions and measures full-page load performance—including ad rendering time—for websites. This tool helps identify performance regressions, optimize loading times, and validate publisher configurations.
+A command‑line tool for measuring full‑page and ad‑slot load performance under real‑world browser conditions. Injects JavaScript into publisher pages (including iframe‑based ads), tracks Web Vitals and Prebid.js events, captures screenshots, and outputs a rich set of metrics for regression testing, optimization, and CI integration.
+
+---
+
+## Table of Contents
+
+1. [Features](#features)
+2. [Requirements](#requirements)
+3. [Installation (Dev)](#installation-dev)
+4. [Quick Start](#quick-start)
+5. [CLI Usage](#cli-usage)
+6. [Configuration](#configuration)
+7. [Testing](#testing)
+8. [Project Layout](#project-layout)
+
+---
 
 ## Features
 
-- **Full-page rendering** using headless Chrome via Pyodide
-- **Comprehensive performance metrics** including Web Vitals (TTFB, FCP, LCP, DOM completion, load events)
-- **Ad performance tracking** with Prebid.js integration
-- **Multi-frame support** for iframe-based ad implementations
-- **Real-time monitoring** with console logging
-- **Screenshot capture** for visual verification
-- **CI/CD ready** for automated testing
+* **Headless Chrome** automation via Chrome DevTools Protocol
+* **Web Vitals** metrics: TTFB, FCP, LCP, DOMContentLoaded, load event
+* **Ad‑slot instrumentation** with Prebid.js event listeners (auction, bids, wins, render success/failure)
+* **Multi‑frame support** (nested iframes, cross‑origin attach)
+* **Real‑time console logs** and optional screenshot capture
+* **CLI‑first**: simple commands, subcommands, and flags
+* **CI/CD ready**: reproducible, scriptable runs for regression testing
+
+---
 
 ## Requirements
 
-- Python 3.8+
-- Pyodide (`pydoll`)
-- Chrome/Chromium browser
+* **Python** ≥ 3.11
+* **Chromium** or **Chrome** installed on the host
+* (Optional) `chromedriver` or ability to launch Chrome via DevTools
 
-## Installation
+---
 
-1. Install dependencies:
-```bash
-pip install pydoll
-```
+## Installation (Dev)
 
-2. Ensure Chrome/Chromium is installed on your system.
-
-## Usage
-
-### Basic Usage
+To set up for local development and get the latest code changes instantly:
 
 ```bash
-python main.py https://example.com
+git clone https://gitlab.infr.zglbl.net/VLin/ad-load-performance-testing
+cd ad-load-performance-testing
+pip install -e .
 ```
 
-### Test Basic Functionality
+This installs your package in "editable" mode; edits under `src/ad_load/…` and top‑level assets are picked up immediately.
 
-First, test that Pyodide is working correctly:
+---
+
+## Quick Start
+
+Run a bare Disqus thread only page:
 
 ```bash
-python test.py
+ad-load run boxing --bare
 ```
 
-This will:
-- Start a Chrome browser
-- Navigate to example.com
-- Take a screenshot
-- Verify basic functionality
-
-### Monitor Ad Performance
+Run full‑page:
 
 ```bash
-python main.py https://your-publisher-site.com
+ad-load run https://example.com
 ```
 
-The script will:
-1. Load the specified URL
-2. Inject performance tracking scripts
-3. Monitor for Prebid.js events
-4. Collect performance metrics
-5. Wait for user input (press 'q' + Enter to finish)
-6. Generate comprehensive reports
+List built‑in site shortcuts:
 
-## Output
+```bash
+ad-load list
+```
 
-The tool provides several types of output:
+---
 
-### Console Logs
-Real-time logging of:
-- Page load events
-- Prebid.js auction events
-- Ad render events
-- Performance metrics
+## CLI Usage
 
-### Performance Metrics
-- **TTFB (Time to First Byte)**: Server response time
-- **FCP (First Contentful Paint)**: First visual content
-- **LCP (Largest Contentful Paint)**: Largest content element
-- **DOM Content Loaded**: DOM parsing completion
-- **Load Event**: Full page load completion
+```
+ad-load [OPTIONS] COMMAND [ARGS]...
+```
 
-### Ad Performance Data
-- Auction start/end times
-- Bid responses and wins
-- Ad render start/completion
-- Time from bid win to render
+### Commands
 
-### Screenshots
-- Visual verification of page state
-- Saved as `prebid_summary.png`
+| Command | Description                               |
+| :------ | :---------------------------------------- |
+| `run`   | Execute performance test for URL/shortcut |
+| `list`  | Display available site shortcuts          |
 
-## JavaScript Files
+### `run` Options
 
-### `prebid_tracking.js`
-Tracks Prebid.js events including:
-- Auction initialization
-- Bid responses
-- Bid wins
-- Ad render success/failure
-- Performance summaries
+```
+Usage: ad-load run [OPTIONS] TARGET
 
-### `performance_metrics.js`
-Collects comprehensive performance data:
-- Navigation timing
-- Paint timing
-- Resource loading
-- Custom performance marks/measures
+Arguments:
+  TARGET         site key or URL
+
+Options:
+  --bare         only render Disqus embed (skip full‑page assets)
+  --headless     launch Chrome in headless mode
+  -h, --help     show this message and exit
+```
+
+---
 
 ## Configuration
 
-### Chrome Options
-The tool uses several Chrome flags for optimal performance:
-- `--disable-blink-features=AutomationControlled`: Avoids detection
-- `--disable-web-security`: Allows cross-origin requests
-- `--no-sandbox`: Reduces overhead
-- `--disable-dev-shm-usage`: Optimizes memory usage
+Chrome launch flags are defined in `ad_load/utils/make_chrome_options.py`. By default:
 
-### Customization
-You can modify the Chrome options in `main.py`:
+* `--disable-blink-features=AutomationControlled`
+* `--disable-web-security`
+* `--no-sandbox`
+* `--disable-dev-shm-usage`
 
-```python
-options = ChromiumOptions()
-options.add_argument("--your-custom-flag")
+To customize flags, edit `make_chrome_options.py` or extend via future CLI options.
+
+---
+
+## Testing
+
+Run all tests:
+
+```bash
+pytest -q
 ```
 
-## Troubleshooting
+---
 
-### Common Issues
+## Project Layout
 
-1. **Chrome not found**: Ensure Chrome/Chromium is installed and in PATH
-2. **Permission errors**: Run with appropriate permissions or use `--no-sandbox`
-3. **Memory issues**: Reduce timeout values or add memory flags
-4. **Network issues**: Check firewall/proxy settings
+```
+├── templates/                 # HTML templates disqus only
+├── injected_scripts/          # JavaScript snippets for injection
+├── pyproject.toml             # package metadata, entry points
+├── src/
+│   └── ad_load/
+│       ├── cli.py             # console entry point
+│       ├── modes/             # workflows (disqus_only, full_page)
+│       ├── loaders/           # script, template, site loaders
+│       └── utils/             # helpers (Injector, Chrome options, etc...)
+├── tests/                     # pytest test suite
+└── README.md                  # this file
+```
 
-### Debug Mode
-
-For debugging, you can modify the script to:
-- Increase timeout values
-- Add more detailed logging
-- Disable headless mode (if supported)
-
-## Use Cases
-
-### Publisher Testing
-- Validate ad configuration performance
-- Identify slow-loading ad networks
-- Optimize ad placement and timing
-
-### Performance Regression Testing
-- Compare performance across deployments
-- Monitor Core Web Vitals
-- Track ad load impact on page performance
-
-### A/B Testing
-- Compare different ad configurations
-- Test optimization strategies
-- Validate performance improvements
-
-### CI/CD Integration
-- Automated performance testing
-- Regression detection
-- Performance trend analysis
-
-## Architecture
-
-The tool uses a layered approach:
-
-1. **Browser Layer**: Pyodide Chrome automation
-2. **Injection Layer**: JavaScript injection for tracking
-3. **Monitoring Layer**: Event collection and logging
-4. **Analysis Layer**: Data processing and reporting
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Support
-
-For issues and questions:
-1. Check the troubleshooting section
-2. Review console output for errors
-3. Test with the basic test script
-4. Open an issue with detailed information
+Note that **`templates/`** and **`injected_scripts/`** live at the top level, not under `src/`.

@@ -23,3 +23,6 @@ include = ["ad_load*"]
 "ad_load.loaders" = ["sites.yaml"]
 "ad_load.injected_scripts" = ["*.js"]
 "ad_load.templates" = ["*.html"]
+
+[project.scripts]
+ad-load = "ad_load.cli:main_entry"
