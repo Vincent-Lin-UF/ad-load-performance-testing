@@ -39,7 +39,6 @@ class TabWrapper():
                 return_by_value=True
             )
         )
-        print(resp)
         return resp["result"]["result"]["value"]
     
     async def inject_script(self, script: str):
@@ -169,8 +168,5 @@ class TabWrapper():
 
         print("[INFO] master DSQ injector registered")
     
-
-        
-        
     def __getattr__(self, name):
         return getattr(self._tab, name)
