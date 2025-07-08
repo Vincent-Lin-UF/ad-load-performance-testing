@@ -5,6 +5,8 @@ import asyncio
 # Pydoll Imports
 from pydoll.commands.fetch_commands import FetchCommands
 from pydoll.constants             import RequestStage
+from pydoll.commands.page_commands import PageCommands
+from pydoll.protocol.page.events import PageEvent
 
 # Local Imports
 from ad_load.pydoll_extensions            import TabWrapper
@@ -57,8 +59,7 @@ async def disqus_only(browser, url: str, headless: bool = False):
 
         await tab._execute_command(FetchCommands.continue_request(rid))
 
-    await tab.on("Fetch.requestPaused", on_paused)
-    
+    await tab.on("Fetch.requestPaused", on_paused)    
     
     await tab.go_to_commit(url)
 

@@ -50,30 +50,37 @@ class TabWrapper():
             )
         )
         
-    async def inject_into_new_frames(self, user_script: str):
-        wrapper = f"""
-        (function(){{
-          const fe = window.frameElement;
-          console.log("[DSQ‑DBG] in frame:", fe && fe.id);
-          if (!(fe && fe.id.startsWith("dsq-"))) return;
-          {user_script}
-        }})();
-        """
+    async def inject_into_new_frames(self, user_script: str):        
+        wrapper = (
+            "const code = " + json.dumps(user_script) + ";\n"
+            "(function(){\n"
+            "try {\n"
+            "    const fe = window.frameElement;\n"
+            "    const me = fe ? `iframe#${fe.id}` : 'top-level';\n"
+            "    console.log(`[DSQ-DBG] running in ${me} @ ${location.href}`);\n"
+            "    console.log('[DSQ-DBG] wrapper executing in frame:', window.frameElement && window.frameElement.id, location.hostname);"
+            "    // List all iframes *inside* this document\n"
+            "    const sources = Array.from(document.getElementsByTagName('iframe'))\n"
+            "    .map(f => f.src || '<no-src>');\n"
+            "    console.log(`[DSQ-DBG] child iframes:`, sources);\n"
+            "    eval(code)\n"
+            "} catch(e) {\n"
+            "    console.error(\"[DSQ-DBG] wrapper error\", e);\n"
+            "}\n"
+            "})();\n"
+        )
 
-        # enable DOM domain
         await self._tab._execute_command(DomCommands.enable())
 
-        # auto‑attach for cross‑origin iframes
         await self._tab._execute_command({
             "method": "Target.setAutoAttach",
             "params": {
                 "autoAttach": True,
-                "waitForDebuggerOnStart": False,
+                "waitForDebuggerOnStart": True,
                 "flatten": True
             }
         })
 
-        #  global hook for main session (top + same‑origin frames)
         await self._tab._execute_command(
             PageCommands.add_script_to_evaluate_on_new_document(
                 source=wrapper,
@@ -81,29 +88,26 @@ class TabWrapper():
             )
         )
 
-        # once page finishes loading, inject into every existing dsq-* iframe
         async def on_load(_event):
-            # get the up‑to‑date frame tree
             resp_tree = await self._tab._execute_command({"method":"Page.getFrameTree"})
             if "result" not in resp_tree:
                 print("[WARN] Page.getFrameTree failed:", resp_tree)
                 return
 
-            def walk(node):
+            def traverse(node):
                 yield node["frame"]["id"]
                 for child in node.get("childFrames", []):
-                    yield from walk(child)
+                    yield from traverse(child)
 
-            for frame_id in walk(resp_tree["result"]["frameTree"]):
-                # find the <iframe> owning this frame
+            for frame_id in traverse(resp_tree["result"]["frameTree"]):
                 resp_owner = await self._tab._execute_command(
                     DomCommands.get_frame_owner(frame_id=frame_id)
                 )
+                
                 if "result" not in resp_owner:
                     continue
                 backend = resp_owner["result"]["backendNodeId"]
 
-                # read its attributes
                 resp_attrs = await self._tab._execute_command(
                     DomCommands.get_attributes(node_id=backend)
                 )
@@ -111,42 +115,61 @@ class TabWrapper():
                     continue
 
                 attr_list = resp_attrs["result"]["attributes"]
-                # build dict
+
                 attrs = dict(zip(attr_list[0::2], attr_list[1::2]))
                 dsq_id = attrs.get("id", "")
-                if dsq_id.startswith("dsq-"):
-                    await self._tab._execute_command(
-                        PageCommands.add_script_to_evaluate_on_new_document(
-                            source=wrapper,
-                            run_immediately=True,
-                            frameId=frame_id
-                        )
+                await self._tab._execute_command(
+                    PageCommands.add_script_to_evaluate_on_new_document(
+                        source=wrapper,
+                        run_immediately=True,
+                        frameId=frame_id
                     )
-                    print(f"[INFO] injected into existing DSQ frame {dsq_id}")
+                )
+                print(f"[INFO] injected into existing DSQ frame {dsq_id}")
 
-        # one‑time listener on load
         await self._tab.on(PageEvent.LOAD_EVENT_FIRED, on_load, temporary=True)
 
-        # 5) catch any new cross‑origin iframes
+        # Will be able to catch Disqus comment iframe and the nested ad iframe
         async def on_attach(evt):
             info      = evt["params"]["targetInfo"]
             sessionId = evt["params"]["sessionId"]
-            if info.get("type") != "iframe":
-                return
-
-            ws = self._tab._connection_handler._ws_connection
-            msg = {
-                "id": next(self._cdp_id),
-                "method": "Page.addScriptToEvaluateOnNewDocument",
-                "params": {"source": wrapper, "runImmediately": True},
-                "sessionId": sessionId
-            }
-            await ws.send(json.dumps(msg))
-            print(f"[INFO] injected into new cross‑origin DSQ iframe {info['targetId']}")
+            if info.get("type") == "iframe":
+                ws = self._tab._connection_handler._ws_connection
+                
+                await ws.send(json.dumps({
+                    "id": next(self._cdp_id),
+                    "method": "Runtime.enable",
+                    "sessionId": sessionId
+                }))
+                
+                await ws.send(json.dumps({
+                    "id": next(self._cdp_id),
+                    "method": "Page.enable",
+                    "sessionId": sessionId
+                }))
+                
+                await ws.send(json.dumps({
+                    "id": next(self._cdp_id),
+                    "method": "Page.addScriptToEvaluateOnNewDocument",
+                    "params": {
+                        "source": wrapper,
+                        "runImmediately": True,
+                    },
+                    "sessionId": sessionId
+                }))
+                
+                await ws.send(json.dumps({
+                    "id": next(self._cdp_id),
+                    "method": "Runtime.runIfWaitingForDebugger",
+                    "sessionId": sessionId
+                }))
+                print(f"[INFO] injected into new cross-origin DSQ iframe {info['targetId']}")
 
         await self._tab.on("Target.attachedToTarget", on_attach)
 
         print("[INFO] master DSQ injector registered")
+    
+
         
         
     def __getattr__(self, name):
