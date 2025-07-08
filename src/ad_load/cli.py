@@ -14,6 +14,11 @@ def main_entry():
     loop.add_signal_handler(signal.SIGTERM, _make_shutdown_handler(loop))
     
     try:
+        loop.add_signal_handler(signal.SIGCHLD, _make_shutdown_handler(loop))
+    except (AttributeError, NotImplementedError):
+        pass
+    
+    try:
         asyncio.run(main.app(main.build_parser().parse_args()))
     except asyncio.CancelledError:
         pass

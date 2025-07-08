@@ -19,6 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("target", help="site key or URL")
     run.add_argument("--bare",    action="store_true", help="render a bare Disqus-only page")
     run.add_argument("--headless", action="store_true", help="run Chrome headless")
+    run.add_argument("--mobile", action="store_true", help="Emulates a mobile device")
     
     sub.add_parser("list", help="show saved site shortcuts")
 
@@ -33,13 +34,21 @@ async def app(args):
         return
 
     url = sites.get(args.target, {}).get("url", args.target)
-    options = await make_chrome_options(headless=args.headless)
+    options = await make_chrome_options(
+        headless=args.headless,
+        mobile=args.mobile,
+    )
     
-    async with Chrome(options=options) as browser:
-        if args.bare:
-            await disqus_only(browser, url, headless=args.headless)
-        else:
-            await full_page(browser, url, headless=args.headless)
+    try:
+        async with Chrome(options=options) as browser:
+            if args.bare:
+                await disqus_only(browser, url, headless=args.headless)
+            else:
+                await full_page(browser, url, headless=args.headless)
+    except asyncio.CancelledError:
+        pass
+    except (OSError, ConnectionResetError):
+        print("Chrome disconnected, exiting.")
             
 def main():
     args = build_parser().parse_args()
