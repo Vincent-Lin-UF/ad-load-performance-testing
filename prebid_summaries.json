@@ -1,0 +1,52 @@
+{
+  "dsq-app7133": {
+    "frameName": "dsq-app7133",
+    "pageLoadTime": 1.199999999254942,
+    "bidWins": [],
+    "adRenders": [],
+    "auctions": [
+      {
+        "auctionId": "47467dd0-4c20-4b95-9452-aeeca1d6f768",
+        "startTime": 1217,
+        "timeSincePageLoad": 1215.800000000745
+      },
+      {
+        "auctionId": "1eeecd77-a90a-4fd5-9d35-58d224352d81",
+        "startTime": 22347.300000000745,
+        "timeSincePageLoad": 22346.10000000149
+      }
+    ]
+  },
+  "dsq-app7135": {
+    "frameName": "dsq-app7135",
+    "pageLoadTime": 1.099999999627471,
+    "bidWins": [
+      {
+        "bidder": "pubmatic",
+        "cpm": 0.08,
+        "adUnitCode": "ad-1",
+        "winTime": 2304.2999999988824,
+        "timeSincePageLoad": 2303.199999999255,
+        "auctionId": "4dc67b68-9d84-4cba-9f4c-b3176138b5ac"
+      }
+    ],
+    "adRenders": [
+      {
+        "renderTime": 2303.7999999988824,
+        "timeSincePageLoad": 2302.699999999255
+      }
+    ],
+    "auctions": [
+      {
+        "auctionId": "4dc67b68-9d84-4cba-9f4c-b3176138b5ac",
+        "startTime": 1267.5,
+        "timeSincePageLoad": 1266.4000000003725
+      },
+      {
+        "auctionId": "b0de346f-dc35-4eb9-a7fb-23e3429ea60f",
+        "startTime": 22323.099999999627,
+        "timeSincePageLoad": 22322
+      }
+    ]
+  }
+}

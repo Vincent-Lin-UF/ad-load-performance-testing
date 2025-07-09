@@ -20,6 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--bare",    action="store_true", help="render a bare Disqus-only page")
     run.add_argument("--headless", action="store_true", help="run Chrome headless")
     run.add_argument("--mobile", action="store_true", help="Emulates a mobile device")
+    run.add_argument("--timeout", type=int, default=30, help="Time before automatic exit (seconds)")
     
     sub.add_parser("list", help="show saved site shortcuts")
 
@@ -42,13 +43,16 @@ async def app(args):
     try:
         async with Chrome(options=options) as browser:
             if args.bare:
-                await disqus_only(browser, url, headless=args.headless)
+                await disqus_only(browser, url, headless=args.headless, timeout=args.timeout)
+                print("Hello")
             else:
                 await full_page(browser, url, headless=args.headless)
     except asyncio.CancelledError:
         pass
     except (OSError, ConnectionResetError):
         print("Chrome disconnected, exiting.")
+    
+    print("This is the end")
             
 def main():
     args = build_parser().parse_args()

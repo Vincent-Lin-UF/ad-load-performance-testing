@@ -143,11 +143,23 @@
     // Start the monitoring
     waitForPrebid();
 
+    window.addEventListener('message', e => {
+        if(e.data && e.data.type === "PREBID_SUMMARY") {
+            console.log('Prebid Summary Obtained from', e.data.frameName, e.data.payload);
+        }
+    });
+
     // Auto-summary after 30 seconds
     setTimeout(() => {
         if (window.getPrebidPerformanceSummary) {
             console.log('\n=== AUTO SUMMARY (30s) for frame', frameName, '===');
             window.getPrebidPerformanceSummary();
+            const data = window.getPrebidPerformanceSummary();
+            window.parent.postMessage({
+                type: "PREBID_SUMMARY",
+                frameName,
+                payload: data
+            }, '*');
         }
-    }, 30000)
+    }, 30000);
 })();
