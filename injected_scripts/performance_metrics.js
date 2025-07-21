@@ -43,10 +43,11 @@
       timestamp: new Date().toISOString()
     };
     
-    return result;
-  } catch (error) {
-    return {
-      error: error.message,
+    // store for later
+    window.__perfMetrics = result;
+  } catch (err) {
+    window.__perfMetrics = {
+      error: err.message,
       timestamp: new Date().toISOString()
     };
   }

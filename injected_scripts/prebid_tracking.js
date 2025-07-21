@@ -2,7 +2,6 @@
     const frameName = window.name || 'unnamed-frame';
     console.log("Performance Tracker Initialized");
 
-
     const pageLoadTime = performance.now();
     console.log("Frame loaded at:", pageLoadTime.toFixed(2), "ms, frame:", frameName);
 

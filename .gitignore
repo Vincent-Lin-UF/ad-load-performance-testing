@@ -9,3 +9,4 @@ archived_scripts/
 .pytest_cache/
 .coverage
 htmlcov/
+notes.txt

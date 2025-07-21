@@ -37,7 +37,8 @@ async def disqus_only(browser, url: str, headless: bool = False, timeout: int = 
     
     # Script Injection
     prebid_js = load_script("prebid_tracking.js")
-    await inject_scripts(tab, prebid_js)
+    performance_js = load_script("performance_metrics.js")
+    await inject_scripts(tab, prebid_js, performance_js)
 
     await tab._execute_command(
         FetchCommands.enable(
@@ -113,3 +114,34 @@ async def disqus_only(browser, url: str, headless: bool = False, timeout: int = 
     with open(out_path, "w") as f:
         json.dump(filtered_summaries, f, indent=2)
     print(f"\nWrote all frames Prebid Summaries to {out_path}")
+    
+    # 2. Collect only real performance metrics
+    perf_data = {}
+    for frame_id, ctx_id in contexts_snapshot.items():
+        # ask for __perfMetrics or null
+        resp = await tab._execute_command(
+            RuntimeCommands.evaluate(
+                expression="""
+                  (typeof window.__perfMetrics !== 'undefined')
+                    ? window.__perfMetrics
+                    : null
+                """,
+                return_by_value=True,
+                context_id=ctx_id
+            )
+        )
+
+        # safely drill into the nested dicts
+        # resp might not have 'result', so use .get(...)
+        remote_obj = resp.get("result", {}).get("result", {})
+        value      = remote_obj.get("value")
+
+        # only keep non‑null metrics
+        if value is not None:
+            perf_data[frame_id] = value
+
+    # 3. Write only the filtered perf metrics to JSON
+    out_perf = "performance_metrics.json"
+    with open(out_perf, "w") as f:
+        json.dump(perf_data, f, indent=2)
+    print(f"Wrote performance metrics to {out_perf}")
