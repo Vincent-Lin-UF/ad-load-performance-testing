@@ -134,6 +134,7 @@ class TabWrapper():
         async def on_attach(evt):
             info      = evt["params"]["targetInfo"]
             sessionId = evt["params"]["sessionId"]
+            
             if info.get("type") == "iframe":
                 ws = self._tab._connection_handler._ws_connection
                 

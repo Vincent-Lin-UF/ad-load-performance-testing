@@ -1,0 +1,38 @@
+{
+  "dsq-app9979": {
+    "frameName": "dsq-app9979",
+    "pageLoadTime": 1,
+    "bidWins": [],
+    "adRenders": [],
+    "auctions": [
+      {
+        "auctionId": "d646c45e-d911-4def-8015-26cf2c95bc47",
+        "startTime": 872.3000000044703,
+        "timeSincePageLoad": 871.3000000044703
+      },
+      {
+        "auctionId": "462efa8e-f897-41ed-9881-a2437ed7bdce",
+        "startTime": 18285.60000000149,
+        "timeSincePageLoad": 18284.60000000149
+      }
+    ]
+  },
+  "dsq-app9981": {
+    "frameName": "dsq-app9981",
+    "pageLoadTime": 0.8999999985098839,
+    "bidWins": [],
+    "adRenders": [],
+    "auctions": [
+      {
+        "auctionId": "87e05555-5a69-4233-b79d-6a65eafaff4c",
+        "startTime": 856.5,
+        "timeSincePageLoad": 855.6000000014901
+      },
+      {
+        "auctionId": "93eda4e8-d28e-44ea-a246-c6ecacfb01dd",
+        "startTime": 18304.5,
+        "timeSincePageLoad": 18303.60000000149
+      }
+    ]
+  }
+}
